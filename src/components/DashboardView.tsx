@@ -27,6 +27,7 @@ interface DashboardViewProps {
   onUpdateProject: (oldName: string, updated: ProjectInfo) => void;
   currentUser?: AppUser;
   categoryLabels?: Record<TaskCategory, string>;
+  usersList?: AppUser[];
 }
 
 export default function DashboardView({
@@ -38,6 +39,7 @@ export default function DashboardView({
   onUpdateProject,
   currentUser,
   categoryLabels,
+  usersList,
 }: DashboardViewProps) {
   const labels = categoryLabels || CATEGORY_LABELS;
   // New project states
@@ -390,16 +392,16 @@ export default function DashboardView({
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5">Assign Engineers to Project</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-3 border border-slate-200 rounded-lg">
-                {[
-                  { name: 'Balarathu', initial: 'BL', desc: 'Senior Project Engineer' },
-                  { name: 'Sarah Thompson', initial: 'ST', desc: 'Automation Engineer' },
-                  { name: 'Markus V', initial: 'MV', desc: 'Systems Specialist' },
-                ].map((eng) => {
+                {((usersList && usersList.length > 0) ? usersList : [
+                  { username: 'balarathu', name: 'Balarathu', avatarInitials: 'BL', designation: 'Senior Project Engineer', role: 'engineer' as const },
+                  { username: 'sarah', name: 'Sarah Thompson', avatarInitials: 'ST', designation: 'Automation Engineer', role: 'engineer' as const },
+                  { username: 'markus', name: 'Markus V', avatarInitials: 'MV', designation: 'Systems Specialist', role: 'engineer' as const },
+                ]).map((eng) => {
                   const isChecked = selectedEngineers.includes(eng.name) || (currentUser?.role === 'engineer' && eng.name === currentUser.name);
                   const isReadOnly = currentUser?.role === 'engineer' && eng.name === currentUser.name;
                   return (
                     <label 
-                      key={eng.name} 
+                      key={eng.username || eng.name} 
                       className={`flex items-center space-x-2.5 p-2 rounded-lg border transition text-xs font-medium cursor-pointer ${
                         isChecked 
                           ? 'border-indigo-500 bg-indigo-50/40 text-indigo-950 font-bold' 
@@ -415,7 +417,7 @@ export default function DashboardView({
                       />
                       <div className="leading-tight">
                         <p>{eng.name}</p>
-                        <p className="text-[9px] text-slate-400 font-normal">{eng.desc}</p>
+                        <p className="text-[9px] text-slate-400 font-normal">{eng.designation}</p>
                       </div>
                     </label>
                   );
@@ -486,7 +488,7 @@ export default function DashboardView({
                     <div>
                       <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Assign Team</label>
                       <div className="space-y-1 bg-slate-50 p-2 rounded border border-slate-200 text-[10px]">
-                        {['Balarathu', 'Sarah Thompson', 'Markus V'].map((engName) => {
+                        {((usersList && usersList.length > 0) ? usersList.map((u) => u.name) : ['Balarathu', 'Sarah Thompson', 'Markus V']).map((engName) => {
                           const isAssigned = editProjAssigned.includes(engName);
                           return (
                             <label key={engName} className="flex items-center gap-1.5 cursor-pointer">

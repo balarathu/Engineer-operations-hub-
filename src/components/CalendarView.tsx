@@ -13,6 +13,7 @@ interface CalendarViewProps {
   setSelectedDate: (date: string) => void;
   currentUser?: AppUser;
   categoryLabels?: Record<TaskCategory, string>;
+  usersList?: AppUser[];
 }
 
 export default function CalendarView({
@@ -25,6 +26,7 @@ export default function CalendarView({
   setSelectedDate,
   currentUser,
   categoryLabels,
+  usersList,
 }: CalendarViewProps) {
   const labels = categoryLabels || CATEGORY_LABELS;
   
@@ -416,6 +418,32 @@ export default function CalendarView({
                       />
                     </div>
 
+                    {currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin') && (
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase">Log Author (Engineer)</label>
+                        <select
+                          value={editEngineer}
+                          onChange={(e) => setEditEngineer(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-xs outline-none focus:border-indigo-500 font-bold"
+                        >
+                          {usersList && usersList.length > 0 ? (
+                            usersList.map((user) => (
+                              <option key={user.username} value={user.name}>
+                                {user.name} ({user.designation || user.role})
+                              </option>
+                            ))
+                          ) : (
+                            <>
+                              <option value="Balarathu">Balarathu (Sr. Engineer)</option>
+                              <option value="Sarah Thompson">Sarah Thompson (Automation)</option>
+                              <option value="Markus V">Markus V (Specialist)</option>
+                              <option value="Admin User">Admin User (Admin)</option>
+                            </>
+                          )}
+                        </select>
+                      </div>
+                    )}
+
                     <div className="flex justify-between items-center pt-1.5 border-t border-slate-100">
                       <select
                         value={editStatus}
@@ -537,10 +565,20 @@ export default function CalendarView({
                     onChange={(e) => setNewEngineer(e.target.value)}
                     className="w-full mt-1 bg-white border border-slate-200 text-xs rounded-md p-1.5 outline-none focus:border-indigo-500 font-semibold cursor-pointer"
                   >
-                    <option value="Balarathu">Balarathu (Sr. Engineer)</option>
-                    <option value="Sarah Thompson">Sarah Thompson (Automation)</option>
-                    <option value="Markus V">Markus V (Specialist)</option>
-                    <option value="Admin User">Admin User (Admin)</option>
+                    {usersList && usersList.length > 0 ? (
+                      usersList.map((user) => (
+                        <option key={user.username} value={user.name}>
+                          {user.name} ({user.designation || user.role})
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Balarathu">Balarathu (Sr. Engineer)</option>
+                        <option value="Sarah Thompson">Sarah Thompson (Automation)</option>
+                        <option value="Markus V">Markus V (Specialist)</option>
+                        <option value="Admin User">Admin User (Admin)</option>
+                      </>
+                    )}
                   </select>
                 </div>
               )}

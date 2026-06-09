@@ -379,7 +379,7 @@ export default function App() {
                 <input
                   type="text"
                   required
-                  placeholder="balarathu, manager, admin"
+                  placeholder="manager, admin"
                   value={loginUsername}
                   onChange={(e) => setLoginUsername(e.target.value)}
                   className="w-full mt-1.5 bg-slate-50 border border-slate-250 text-sm rounded-xl p-2.5 outline-none focus:border-indigo-500 focus:bg-white transition"
@@ -648,6 +648,7 @@ export default function App() {
               setSelectedDate={setSelectedDate}
               currentUser={currentUser}
               categoryLabels={categoryLabels}
+              usersList={usersList}
             />
           )}
 
@@ -661,6 +662,7 @@ export default function App() {
               onBulkImport={handleBulkImport}
               currentUser={currentUser}
               categoryLabels={categoryLabels}
+              usersList={usersList}
             />
           )}
 
@@ -674,6 +676,7 @@ export default function App() {
               onUpdateProject={handleUpdateProject}
               currentUser={currentUser}
               categoryLabels={categoryLabels}
+              usersList={usersList}
             />
           )}
 

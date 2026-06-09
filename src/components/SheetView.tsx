@@ -12,6 +12,7 @@ interface SheetViewProps {
   onBulkImport: (importedTasks: TaskEntry[]) => void;
   currentUser?: AppUser;
   categoryLabels?: Record<TaskCategory, string>;
+  usersList?: AppUser[];
 }
 
 export default function SheetView({
@@ -23,6 +24,7 @@ export default function SheetView({
   onBulkImport,
   currentUser,
   categoryLabels,
+  usersList,
 }: SheetViewProps) {
   const labels = categoryLabels || CATEGORY_LABELS;
 
@@ -389,10 +391,20 @@ export default function SheetView({
               className="w-full bg-slate-50/50 border border-indigo-200 focus:border-indigo-550 rounded-lg px-2 py-1.5 text-xs text-slate-700 outline-none focus:bg-white disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed"
             >
               <option value="ALL">All Engineers (Tracking)</option>
-              <option value="Balarathu">Balarathu (Sr. Engineer)</option>
-              <option value="Sarah Thompson">Sarah Thompson (Automation)</option>
-              <option value="Markus V">Markus V (Specialist)</option>
-              <option value="Admin User">Admin User (Admin)</option>
+              {usersList && usersList.length > 0 ? (
+                usersList.map((user) => (
+                  <option key={user.username} value={user.name}>
+                    {user.name} ({user.designation || user.role})
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="Balarathu">Balarathu (Sr. Engineer)</option>
+                  <option value="Sarah Thompson">Sarah Thompson (Automation)</option>
+                  <option value="Markus V">Markus V (Specialist)</option>
+                  <option value="Admin User">Admin User (Admin)</option>
+                </>
+              )}
             </select>
           </div>
         </div>
@@ -475,10 +487,20 @@ export default function SheetView({
                     onChange={(e) => setQuickEngineer(e.target.value)}
                     className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-mono font-bold text-indigo-700 cursor-pointer"
                   >
-                    <option value="Balarathu">Balarathu</option>
-                    <option value="Sarah Thompson">Sarah Thompson</option>
-                    <option value="Markus V">Markus V</option>
-                    <option value="Admin User">Admin User</option>
+                    {usersList && usersList.length > 0 ? (
+                      usersList.map((user) => (
+                        <option key={user.username} value={user.name}>
+                          {user.name}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option value="Balarathu">Balarathu</option>
+                        <option value="Sarah Thompson">Sarah Thompson</option>
+                        <option value="Markus V">Markus V</option>
+                        <option value="Admin User">Admin User</option>
+                      </>
+                    )}
                   </select>
                 ) : (
                   <div className="text-center font-bold font-mono text-indigo-600 text-[10px] select-none p-1.5">
@@ -589,10 +611,20 @@ export default function SheetView({
                             onChange={(e) => setEditEngineer(e.target.value)}
                             className="w-full bg-white border border-slate-250 rounded p-1 text-xs font-mono font-bold text-indigo-700 cursor-pointer"
                           >
-                            <option value="Balarathu">Balarathu</option>
-                            <option value="Sarah Thompson">Sarah Thompson</option>
-                            <option value="Markus V">Markus V</option>
-                            <option value="Admin User">Admin User</option>
+                            {usersList && usersList.length > 0 ? (
+                              usersList.map((user) => (
+                                <option key={user.username} value={user.name}>
+                                  {user.name}
+                                </option>
+                              ))
+                            ) : (
+                              <>
+                                <option value="Balarathu">Balarathu</option>
+                                <option value="Sarah Thompson">Sarah Thompson</option>
+                                <option value="Markus V">Markus V</option>
+                                <option value="Admin User">Admin User</option>
+                              </>
+                            )}
                           </select>
                         ) : (
                           <div className="text-center font-bold font-mono text-indigo-650 text-[10px] select-none p-1.5">
