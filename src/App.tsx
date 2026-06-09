@@ -86,12 +86,12 @@ export default function App() {
 
   const handleUpdateCategoryLabels = (updated: Record<TaskCategory, string>) => {
     setCategoryLabels(updated);
-    localStorage.setItem('op_hub_category_labels', JSON.stringify(updated));
+    saveToStorage(tasks, projects, usersList, updated, presets);
   };
 
   const handleUpdatePresets = (updated: any[]) => {
     setPresets(updated);
-    localStorage.setItem('op_hub_quick_presets', JSON.stringify(updated));
+    saveToStorage(tasks, projects, usersList, categoryLabels, updated);
   };
 
   // Load state from localStorage on startup or fallback to initial hardcoded logs
@@ -153,12 +153,43 @@ export default function App() {
       if (data.success) {
         const remoteTasks = data.tasks || [];
         const remoteProjects = data.projects || [];
+        const remoteUsers = data.users || [];
+        const remoteCategoryLabels = data.categoryLabels || {};
+        const remotePresets = data.presets || [];
+
         setTasks(remoteTasks);
         setProjects(remoteProjects);
+        
         try {
           localStorage.setItem('engineer_tasks', JSON.stringify(remoteTasks));
           localStorage.setItem('engineer_projects', JSON.stringify(remoteProjects));
         } catch {}
+
+        if (remoteUsers.length > 0) {
+          setUsersList(remoteUsers);
+          try {
+            localStorage.setItem('op_hub_users_list', JSON.stringify(remoteUsers));
+            remoteUsers.forEach((u: any) => {
+              if (u.password && u.username) {
+                localStorage.setItem(`pw_${u.username}`, u.password);
+              }
+            });
+          } catch {}
+        }
+
+        if (Object.keys(remoteCategoryLabels).length > 0) {
+          setCategoryLabels(remoteCategoryLabels);
+          try {
+            localStorage.setItem('op_hub_category_labels', JSON.stringify(remoteCategoryLabels));
+          } catch {}
+        }
+
+        if (remotePresets.length > 0) {
+          setPresets(remotePresets);
+          try {
+            localStorage.setItem('op_hub_quick_presets', JSON.stringify(remotePresets));
+          } catch {}
+        }
         
         const nowStr = new Date().toLocaleTimeString();
         setLastSyncTime(nowStr);
@@ -176,7 +207,14 @@ export default function App() {
     }
   };
 
-  const syncToGoogleSheet = async (url: string, updatedTasks: TaskEntry[], updatedProjects: ProjectInfo[]) => {
+  const syncToGoogleSheet = async (
+    url: string,
+    updatedTasks: TaskEntry[],
+    updatedProjects: ProjectInfo[],
+    updatedUsersList: AppUser[] = usersList,
+    updatedCategoryLabels: Record<TaskCategory, string> = categoryLabels,
+    updatedPresets: any[] = presets
+  ) => {
     if (!url) return;
     setSyncStatus('syncing');
     try {
@@ -189,6 +227,9 @@ export default function App() {
           action: 'save_all',
           tasks: updatedTasks,
           projects: updatedProjects,
+          users: updatedUsersList,
+          categoryLabels: updatedCategoryLabels,
+          presets: updatedPresets,
         }),
       });
       const data = await response.json();
@@ -238,19 +279,28 @@ export default function App() {
     }
   }, []);
 
-  const saveToStorage = (updatedTasks: TaskEntry[], updatedProjects: ProjectInfo[]) => {
+  function saveToStorage(
+    updatedTasks: TaskEntry[],
+    updatedProjects: ProjectInfo[],
+    updatedUsersList: AppUser[] = usersList,
+    updatedCategoryLabels: Record<TaskCategory, string> = categoryLabels,
+    updatedPresets: any[] = presets
+  ) {
     try {
       localStorage.setItem('engineer_tasks', JSON.stringify(updatedTasks));
       localStorage.setItem('engineer_projects', JSON.stringify(updatedProjects));
+      localStorage.setItem('op_hub_users_list', JSON.stringify(updatedUsersList));
+      localStorage.setItem('op_hub_category_labels', JSON.stringify(updatedCategoryLabels));
+      localStorage.setItem('op_hub_quick_presets', JSON.stringify(updatedPresets));
 
       const savedUrl = localStorage.getItem('op_hub_sheet_url');
       if (savedUrl) {
-        syncToGoogleSheet(savedUrl, updatedTasks, updatedProjects);
+        syncToGoogleSheet(savedUrl, updatedTasks, updatedProjects, updatedUsersList, updatedCategoryLabels, updatedPresets);
       }
     } catch (e) {
       console.warn('LocalStorage save failed: ', e);
     }
-  };
+  }
 
   // State handlers
   const handleAddTask = (newTask: Omit<TaskEntry, 'id'>) => {
@@ -283,7 +333,7 @@ export default function App() {
     }
     
     // Custom set passcode support
-    const storedPw = localStorage.getItem(`pw_${matched.username}`);
+    const storedPw = matched.password || localStorage.getItem(`pw_${matched.username}`);
     const expectedPassword = decryptPassword(storedPw, `${matched.username}123`);
     if (loginPassword !== expectedPassword) {
       setErrorMsg(`Incorrect passcode. Check staff records or try the default user passcode.`);
@@ -305,19 +355,19 @@ export default function App() {
   const handleUpdateUser = (username: string, updated: AppUser) => {
     const updatedUsers = usersList.map((u) => u.username === username ? updated : u);
     setUsersList(updatedUsers);
-    localStorage.setItem('op_hub_users_list', JSON.stringify(updatedUsers));
+    saveToStorage(tasks, projects, updatedUsers);
   };
 
   const handleAddUser = (newUser: AppUser) => {
     const updatedUsers = [...usersList, newUser];
     setUsersList(updatedUsers);
-    localStorage.setItem('op_hub_users_list', JSON.stringify(updatedUsers));
+    saveToStorage(tasks, projects, updatedUsers);
   };
 
   const handleDeleteUser = (username: string) => {
     const updatedUsers = usersList.filter((u) => u.username !== username);
     setUsersList(updatedUsers);
-    localStorage.setItem('op_hub_users_list', JSON.stringify(updatedUsers));
+    saveToStorage(tasks, projects, updatedUsers);
   };
 
   const handleUpdateCurrentUser = (updated: AppUser) => {

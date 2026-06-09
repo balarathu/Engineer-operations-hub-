@@ -59,6 +59,7 @@ export interface AppUser {
   role: 'admin' | 'manager' | 'engineer';
   avatarInitials: string;
   designation: string;
+  password?: string;
 }
 
 export const APP_USERS: AppUser[] = [

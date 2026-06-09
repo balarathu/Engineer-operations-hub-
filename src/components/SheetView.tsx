@@ -44,6 +44,24 @@ function doGet(e) {
       projectSheet = ss.insertSheet("Projects");
       projectSheet.appendRow(["name", "status", "leadEngineer", "description", "assignedEngineers"]);
     }
+
+    let userSheet = ss.getSheetByName("Users");
+    if (!userSheet) {
+      userSheet = ss.insertSheet("Users");
+      userSheet.appendRow(["username", "name", "role", "avatarInitials", "designation", "password"]);
+    }
+
+    let catLabelSheet = ss.getSheetByName("CategoryLabels");
+    if (!catLabelSheet) {
+      catLabelSheet = ss.insertSheet("CategoryLabels");
+      catLabelSheet.appendRow(["key", "label"]);
+    }
+
+    let presetSheet = ss.getSheetByName("Presets");
+    if (!presetSheet) {
+      presetSheet = ss.insertSheet("Presets");
+      presetSheet.appendRow(["id", "label", "emoji", "project", "category", "description", "timeSpent"]);
+    }
     
     // Read Tasks
     const tasksData = taskSheet.getDataRange().getValues();
@@ -83,11 +101,57 @@ function doGet(e) {
         projects.push(proj);
       }
     }
+
+    // Read Users
+    const usersData = userSheet.getDataRange().getValues();
+    const users = [];
+    if (usersData.length > 1) {
+      const headers = usersData[0];
+      for (let i = 1; i < usersData.length; i++) {
+        const row = usersData[i];
+        const usr = {};
+        headers.forEach((h, index) => {
+          usr[h] = row[index];
+        });
+        users.push(usr);
+      }
+    }
+
+    // Read CategoryLabels
+    const catLabelData = catLabelSheet.getDataRange().getValues();
+    const categoryLabels = {};
+    if (catLabelData.length > 1) {
+      for (let i = 1; i < catLabelData.length; i++) {
+        const row = catLabelData[i];
+        if (row[0]) {
+          categoryLabels[row[0]] = row[1];
+        }
+      }
+    }
+
+    // Read Presets
+    const presetData = presetSheet.getDataRange().getValues();
+    const presets = [];
+    if (presetData.length > 1) {
+      const headers = presetData[0];
+      for (let i = 1; i < presetData.length; i++) {
+        const row = presetData[i];
+        const pre = {};
+        headers.forEach((h, index) => {
+          pre[h] = row[index];
+        });
+        pre.timeSpent = Number(pre.timeSpent) || 0;
+        presets.push(pre);
+      }
+    }
     
     return ContentService.createTextOutput(JSON.stringify({ 
       success: true, 
       tasks, 
-      projects 
+      projects,
+      users,
+      categoryLabels,
+      presets
     })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
@@ -101,7 +165,7 @@ function doPost(e) {
     const ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
     
     if (payload.action === "save_all") {
-      const { tasks, projects } = payload;
+      const { tasks, projects, users, categoryLabels, presets } = payload;
       
       // Save Tasks
       let taskSheet = ss.getSheetByName("Tasks");
@@ -143,6 +207,63 @@ function doPost(e) {
             p.leadEngineer || "",
             p.description || "",
             JSON.stringify(p.assignedEngineers || [])
+          ]);
+        });
+      }
+
+      // Save Users
+      let userSheet = ss.getSheetByName("Users");
+      if (userSheet) {
+        userSheet.clear();
+      } else {
+        userSheet = ss.insertSheet("Users");
+      }
+      userSheet.appendRow(["username", "name", "role", "avatarInitials", "designation", "password"]);
+      if (users && users.length > 0) {
+        users.forEach(u => {
+          userSheet.appendRow([
+            u.username || "",
+            u.name || "",
+            u.role || "",
+            u.avatarInitials || "",
+            u.designation || "",
+            u.password || ""
+          ]);
+        });
+      }
+
+      // Save CategoryLabels
+      let catLabelSheet = ss.getSheetByName("CategoryLabels");
+      if (catLabelSheet) {
+        catLabelSheet.clear();
+      } else {
+        catLabelSheet = ss.insertSheet("CategoryLabels");
+      }
+      catLabelSheet.appendRow(["key", "label"]);
+      if (categoryLabels) {
+        Object.keys(categoryLabels).forEach(key => {
+          catLabelSheet.appendRow([key, categoryLabels[key]]);
+        });
+      }
+
+      // Save Presets
+      let presetSheet = ss.getSheetByName("Presets");
+      if (presetSheet) {
+        presetSheet.clear();
+      } else {
+        presetSheet = ss.insertSheet("Presets");
+      }
+      presetSheet.appendRow(["id", "label", "emoji", "project", "category", "description", "timeSpent"]);
+      if (presets && presets.length > 0) {
+        presets.forEach(p => {
+          presetSheet.appendRow([
+            p.id || "",
+            p.label || "",
+            p.emoji || "",
+            p.project || "",
+            p.category || "",
+            p.description || "",
+            p.timeSpent || 0
           ]);
         });
       }

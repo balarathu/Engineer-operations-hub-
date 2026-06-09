@@ -97,7 +97,7 @@ export default function UserManagementView({
   const [profileDesignation, setProfileDesignation] = useState(currentUser.designation);
   const [profileInitials, setProfileInitials] = useState(currentUser.avatarInitials);
   const [profilePassword, setProfilePassword] = useState(() => {
-    const raw = localStorage.getItem(`pw_${currentUser.username}`);
+    const raw = currentUser.password || localStorage.getItem(`pw_${currentUser.username}`);
     return decryptPassword(raw, `${currentUser.username}123`);
   });
   const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
@@ -121,10 +121,13 @@ export default function UserManagementView({
       avatarInitials: profileInitials.trim().substring(0, 2).toUpperCase(),
     };
 
-    onUpdateCurrentUser(updated);
     if (profilePassword.trim()) {
-      localStorage.setItem(`pw_${currentUser.username}`, encryptPassword(profilePassword.trim()));
+      const enc = encryptPassword(profilePassword.trim());
+      updated.password = enc;
+      localStorage.setItem(`pw_${currentUser.username}`, enc);
     }
+
+    onUpdateCurrentUser(updated);
     setIsEditingProfile(false);
     setProfileSuccessMsg('Profile details successfully updated.');
     setTimeout(() => setProfileSuccessMsg(''), 4000);
@@ -156,10 +159,12 @@ export default function UserManagementView({
       avatarInitials: computedInitials,
     };
 
+    const chosenPassword = newPassword.trim() || `${formattedUsername}123`;
+    newUser.password = encryptPassword(chosenPassword);
+
     onAddUser(newUser);
 
     // Initial default or customized password setup
-    const chosenPassword = newPassword.trim() || `${formattedUsername}123`;
     localStorage.setItem(`pw_${formattedUsername}`, encryptPassword(chosenPassword));
 
     // Reset Form
@@ -178,7 +183,7 @@ export default function UserManagementView({
     setEditRole(user.role);
     setEditDesignation(user.designation);
     setEditInitials(user.avatarInitials);
-    const rawPw = localStorage.getItem(`pw_${user.username}`);
+    const rawPw = user.password || localStorage.getItem(`pw_${user.username}`);
     setEditPassword(decryptPassword(rawPw, `${user.username}123`));
   };
 
@@ -196,10 +201,13 @@ export default function UserManagementView({
       avatarInitials: editInitials.trim().substring(0, 2).toUpperCase(),
     };
 
-    onUpdateUser(username, updated);
     if (editPassword.trim()) {
-      localStorage.setItem(`pw_${username}`, encryptPassword(editPassword.trim()));
+      const enc = encryptPassword(editPassword.trim());
+      updated.password = enc;
+      localStorage.setItem(`pw_${username}`, enc);
     }
+
+    onUpdateUser(username, updated);
     setEditingUsername(null);
   };
 
