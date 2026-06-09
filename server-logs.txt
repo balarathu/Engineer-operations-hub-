@@ -1,0 +1,4 @@
+[2026-06-09T09:22:34.985Z] GET /api/proxy-sheet called
+[2026-06-09T09:22:34.985Z] GET fetching Google Sheet: https://script.google.com/macros/s/AKfycbwUdYjHkM_Saqs7FSwTk5lEGT4UTkGvcYT56T1q1UincEKeT6aMrPEnjU3cIZFJzDcL/exec?t=1780996954985
+[2026-06-09T09:22:37.574Z] GET Google Response status: 200
+[2026-06-09T09:22:37.684Z] GET Google Response body length: 41
