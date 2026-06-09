@@ -1,0 +1,6 @@
+{
+  "name": "Engineering Project Planner",
+  "description": "Daily calendar and spreadsheet task-tracker for maintaining automation projects on track and logging office support lines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
